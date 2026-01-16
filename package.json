@@ -1,12 +1,11 @@
 {
   "name": "crud",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "index.js",
  "scripts": {
   "build": "tsc",
-  "dev": "nodemon --exec ts-node src/index.ts",
-  "start": "node dist/index.js",
-  "test": "jest"
+  "dev": "nodemon --exec ts-node index.ts",
+  "start": "node dist/src/index.js"
 },
 
   "engines": {
