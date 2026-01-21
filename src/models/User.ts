@@ -9,6 +9,9 @@ export interface IUser extends Document {
   password: string;
   role: "customer" | "admin" | "vendor";
   isActive: boolean;
+  isEmailVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpire?: Date;
   profilePicture?: string;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
@@ -54,6 +57,12 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: true,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: String,
+    emailVerificationExpire: Date,
     profilePicture: {
       type: String,
     },

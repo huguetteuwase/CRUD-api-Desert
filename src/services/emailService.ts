@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { welcomeEmailTemplate, passwordResetTemplate, orderConfirmationTemplate } from '../templates/email.templates';
+import { welcomeEmailTemplate, passwordResetTemplate, orderConfirmationTemplate, emailVerificationTemplate } from '../templates/email.templates';
 
 interface EmailOptions {
   to: string;
@@ -59,6 +59,16 @@ class EmailService {
       // Fallback to console logging
       console.log(`[EMAIL FALLBACK] To: ${options.to}, Subject: ${options.subject}`);
     }
+  }
+
+  async sendVerificationEmail(email: string, firstName: string, verificationToken: string): Promise<void> {
+    const html = emailVerificationTemplate(firstName, verificationToken);
+    await this.sendEmail({
+      to: email,
+      subject: 'Verify Your Email Address',
+      html,
+    });
+    console.log(`[EMAIL] Verification email sent to ${firstName} (${email})`);
   }
 
   async sendWelcomeEmail(email: string, firstName: string): Promise<void> {

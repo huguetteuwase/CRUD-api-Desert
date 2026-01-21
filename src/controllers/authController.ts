@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { User } from "../models/User";
 import { generateToken } from "../utils/jwt";
 import { emailService } from "../services/emailService";
+import { emailVerificationTemplate } from "../templates/email.templates";
 import crypto from "crypto";
 
 interface AuthRequest extends Request {
@@ -45,18 +46,24 @@ export const register = async (req: Request, res: Response) => {
       role: role || "customer", // Use provided role or default to customer
     });
 
+    // Generate email verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    user.emailVerificationToken = crypto.createHash("sha256").update(verificationToken).digest("hex");
+    user.emailVerificationExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    await user.save();
+
     // Generate token
     const token = generateToken(user._id.toString());
 
     // Remove password from response
     const { password: _, ...userResponse } = user.toObject();
 
-    // Send welcome email
-    emailService.sendWelcomeEmail(user.email, user.firstName);
+    // Send verification email
+    emailService.sendVerificationEmail(user.email, user.firstName, verificationToken);
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully",
+      message: "User registered successfully. Please check your email to verify your account.",
       data: { user: userResponse, token },
     });
   } catch (error: any) {
@@ -134,6 +141,65 @@ export const getMe = async (req: AuthRequest, res: Response) => {
       error: "Internal server error",
       message: error.message,
     });
+  }
+};
+
+// GET /auth/verify-email
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).send(`
+        <html><body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #f44336;">Invalid Verification Link</h2>
+          <p>The verification token is missing.</p>
+        </body></html>
+      `);
+    }
+
+    // Hash token to compare
+    const hashedToken = crypto.createHash("sha256").update(token as string).digest("hex");
+
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).send(`
+        <html><body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #f44336;">Invalid or Expired Link</h2>
+          <p>The verification link is invalid or has expired.</p>
+          <a href="http://localhost:3000/api/auth/resend-verification" style="color: #4CAF50;">Request new verification email</a>
+        </body></html>
+      `);
+    }
+
+    // Verify email
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpire = undefined;
+    await user.save();
+
+    // Send welcome email after verification
+    emailService.sendWelcomeEmail(user.email, user.firstName);
+
+    res.status(200).send(`
+      <html><body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+        <h2 style="color: #4CAF50;">Email Verified Successfully!</h2>
+        <p>Welcome ${user.firstName}! Your email has been verified.</p>
+        <p>You can now close this window and return to the application.</p>
+        <a href="http://localhost:3000/dashboard" style="display: inline-block; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px;">Go to Dashboard</a>
+      </body></html>
+    `);
+  } catch (error: any) {
+    res.status(500).send(`
+      <html><body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+        <h2 style="color: #f44336;">Verification Failed</h2>
+        <p>An error occurred during verification. Please try again.</p>
+      </body></html>
+    `);
   }
 };
 

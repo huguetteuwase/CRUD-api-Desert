@@ -12,6 +12,7 @@ import {
   getUserById,
   updateUser,
   deleteUser,
+  verifyEmail,
 } from "../controllers/authController";
 import { authenticate, authorize } from "../middleware/auth";
 
@@ -65,6 +66,28 @@ const router = Router();
  *         description: User already exists
  */
 router.post("/register", register);
+
+/**
+ * @swagger
+ * /api/auth/verify-email:
+ *   get:
+ *     tags: [Authentication]
+ *     summary: Verify email address
+ *     description: Verify user email using verification token from email link
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Email verification token
+ *     responses:
+ *       200:
+ *         description: Email verified successfully (HTML response)
+ *       400:
+ *         description: Invalid or expired token (HTML response)
+ */
+router.get("/verify-email", verifyEmail);
 
 /**
  * @swagger
