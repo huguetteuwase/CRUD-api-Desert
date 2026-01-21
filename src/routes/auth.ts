@@ -13,6 +13,7 @@ import {
   updateUser,
   deleteUser,
   verifyEmail,
+  resendVerification,
 } from "../controllers/authController";
 import { authenticate, authorize } from "../middleware/auth";
 
@@ -88,6 +89,33 @@ router.post("/register", register);
  *         description: Invalid or expired token (HTML response)
  */
 router.get("/verify-email", verifyEmail);
+
+/**
+ * @swagger
+ * /api/auth/resend-verification:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Resend verification email
+ *     description: Send new verification email to user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: john@example.com
+ *     responses:
+ *       200:
+ *         description: Verification email sent
+ *       404:
+ *         description: User not found
+ */
+router.post("/resend-verification", resendVerification);
 
 /**
  * @swagger

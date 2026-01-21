@@ -203,6 +203,42 @@ export const verifyEmail = async (req: Request, res: Response) => {
   }
 };
 
+// POST /auth/resend-verification
+export const resendVerification = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({ error: "Email already verified" });
+    }
+
+    // Generate new verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    user.emailVerificationToken = crypto.createHash("sha256").update(verificationToken).digest("hex");
+    user.emailVerificationExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    await user.save();
+
+    // Send verification email
+    emailService.sendVerificationEmail(user.email, user.firstName, verificationToken);
+
+    res.status(200).json({
+      success: true,
+      message: "Verification email sent successfully",
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: "Internal server error", message: error.message });
+  }
+};
+
 // POST /auth/logout
 export const logout = async (req: AuthRequest, res: Response) => {
   res.status(200).json({
