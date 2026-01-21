@@ -6,11 +6,35 @@ const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
 /**
  * @swagger
+ * /api/cart/count:
+ *   get:
+ *     tags: [Cart]
+ *     summary: Get cart item count
+ *     description: Get total number of items in user's cart (sum of all quantities)
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cart item count retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 itemCount:
+ *                   type: number
+ *                   example: 3
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/count", auth_1.authenticate, cartController_1.getCartItemCount);
+/**
+ * @swagger
  * /api/cart:
  *   get:
  *     tags: [Cart]
  *     summary: Get user cart
- *     description: Get current user's shopping cart (automatically linked to JWT user)
+ *     description: Get current user's shopping cart with item count (automatically linked to JWT user)
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -19,7 +43,17 @@ const router = (0, express_1.Router)();
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Cart'
+ *               type: object
+ *               properties:
+ *                 userId:
+ *                   type: string
+ *                 items:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 itemCount:
+ *                   type: number
+ *                   example: 3
  *       401:
  *         description: Unauthorized
  */

@@ -14,6 +14,8 @@ const auth_1 = __importDefault(require("./routes/auth"));
 const orders_1 = __importDefault(require("./routes/orders"));
 const users_1 = __importDefault(require("./routes/users"));
 const ordersCrud_1 = __importDefault(require("./routes/ordersCrud"));
+const upload_1 = __importDefault(require("./routes/upload"));
+const test_1 = __importDefault(require("./routes/test"));
 const database_1 = require("./config/database");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -31,6 +33,8 @@ app.use((req, res, next) => {
     }
 });
 app.use(express_1.default.json());
+// Serve uploaded files statically
+app.use('/uploads', express_1.default.static('uploads'));
 // Swagger documentation
 app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.swaggerSpec));
 // routes
@@ -41,6 +45,8 @@ app.use("/api/cart", cart_1.default);
 app.use("/api/orders", orders_1.default);
 app.use("/api/users", users_1.default);
 app.use("/api/orders-crud", ordersCrud_1.default);
+app.use("/api/upload", upload_1.default);
+app.use("/api/test", test_1.default);
 // handle invalid JSON errors from `express.json()` and return details
 app.use((err, req, res, next) => {
     if (err instanceof SyntaxError &&

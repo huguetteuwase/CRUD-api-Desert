@@ -2,6 +2,8 @@ import { Response } from "express";
 import { Order } from "../models/Order";
 import CartModel from "../models/cartModel";
 import ProductModel from "../models/productModel";
+import { User } from "../models/User";
+import { emailService } from "../services/emailService";
 
 interface AuthRequest extends Request {
   user?: any;
@@ -62,6 +64,17 @@ export const createOrder = async (req: any, res: Response) => {
     // Clear cart
     cart.items.splice(0, cart.items.length);
     await cart.save();
+
+    // Send order confirmation email
+    const user = await User.findById(userId);
+    if (user) {
+      emailService.sendOrderPlacedEmail(
+        user.email,
+        user.firstName,
+        order._id.toString(),
+        totalAmount
+      );
+    }
 
     res.status(201).json({
       success: true,
@@ -194,6 +207,17 @@ export const updateOrderStatus = async (req: any, res: Response) => {
 
     order.status = status;
     await order.save();
+
+    // Send order status update email
+    const user = await User.findById(order.userId);
+    if (user) {
+      emailService.sendOrderStatusEmail(
+        user.email,
+        user.firstName,
+        order._id.toString(),
+        status
+      );
+    }
 
     res.status(200).json({
       success: true,

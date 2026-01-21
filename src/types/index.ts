@@ -14,6 +14,7 @@ export interface Product {
   categoryId: mongoose.Types.ObjectId | string;
   inStock: boolean;
   quantity: number;
+  images?: string[];
   createdBy?: mongoose.Types.ObjectId | string;
 }
 

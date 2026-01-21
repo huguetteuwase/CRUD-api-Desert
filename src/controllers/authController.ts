@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import { User } from "../models/User";
 import { generateToken } from "../utils/jwt";
+import { emailService } from "../services/emailService";
 import crypto from "crypto";
 
 interface AuthRequest extends Request {
@@ -49,6 +50,9 @@ export const register = async (req: Request, res: Response) => {
 
     // Remove password from response
     const { password: _, ...userResponse } = user.toObject();
+
+    // Send welcome email
+    emailService.sendWelcomeEmail(user.email, user.firstName);
 
     res.status(201).json({
       success: true,
@@ -165,6 +169,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     await user.save();
 
+    // Send password reset email
+    emailService.sendPasswordResetEmail(user.email, user.firstName, resetToken);
+
     res.status(200).json({
       success: true,
       message: "Password reset token generated",
@@ -240,6 +247,9 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     // Update password
     user.password = newPassword;
     await user.save();
+
+    // Send password changed email
+    emailService.sendPasswordChangedEmail(user.email, user.firstName);
 
     res.status(200).json({
       success: true,

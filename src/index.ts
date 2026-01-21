@@ -9,6 +9,8 @@ import authRouter from "./routes/auth";
 import ordersRouter from "./routes/orders";
 import usersRouter from "./routes/users";
 import ordersCrudRouter from "./routes/ordersCrud";
+import uploadRouter from "./routes/upload";
+import testRouter from "./routes/test";
 import { connectDB } from "./config/database";
 
 dotenv.config();
@@ -26,8 +28,11 @@ app.use((req, res, next) => {
   } else {
     next();
   }
-});
+});       
 app.use(express.json());
+
+// Serve uploaded files statically
+app.use('/uploads', express.static('uploads'));
 
 // Swagger documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -40,6 +45,8 @@ app.use("/api/cart", cartRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/orders-crud", ordersCrudRouter);
+app.use("/api/upload", uploadRouter);
+app.use("/api/test", testRouter);
 
 // handle invalid JSON errors from `express.json()` and return details
 app.use(

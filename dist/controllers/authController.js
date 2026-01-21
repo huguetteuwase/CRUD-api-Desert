@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.getUserById = exports.getAllUsers = exports.changePassword = exports.resetPassword = exports.forgotPassword = exports.logout = exports.getMe = exports.login = exports.register = void 0;
 const User_1 = require("../models/User");
 const jwt_1 = require("../utils/jwt");
+const emailService_1 = require("../services/emailService");
 const crypto_1 = __importDefault(require("crypto"));
 // POST /auth/register
 const register = async (req, res) => {
@@ -42,6 +43,8 @@ const register = async (req, res) => {
         const token = (0, jwt_1.generateToken)(user._id.toString());
         // Remove password from response
         const { password: _, ...userResponse } = user.toObject();
+        // Send welcome email
+        emailService_1.emailService.sendWelcomeEmail(user.email, user.firstName);
         res.status(201).json({
             success: true,
             message: "User registered successfully",
@@ -147,6 +150,8 @@ const forgotPassword = async (req, res) => {
             .digest("hex");
         user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
         await user.save();
+        // Send password reset email
+        emailService_1.emailService.sendPasswordResetEmail(user.email, user.firstName, resetToken);
         res.status(200).json({
             success: true,
             message: "Password reset token generated",
@@ -214,6 +219,8 @@ const changePassword = async (req, res) => {
         // Update password
         user.password = newPassword;
         await user.save();
+        // Send password changed email
+        emailService_1.emailService.sendPasswordChangedEmail(user.email, user.firstName);
         res.status(200).json({
             success: true,
             message: "Password changed successfully",

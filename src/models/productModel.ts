@@ -10,6 +10,7 @@ const ProductSchema: Schema = new Schema<ProductDocument>({
   categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true } as any,
   inStock: { type: Boolean, default: true },
   quantity: { type: Number, default: 0 },
+  images: [{ type: String }],
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true } as any,
 });
 

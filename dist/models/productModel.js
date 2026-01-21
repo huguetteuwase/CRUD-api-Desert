@@ -41,6 +41,7 @@ const ProductSchema = new mongoose_1.Schema({
     categoryId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Category', required: true },
     inStock: { type: Boolean, default: true },
     quantity: { type: Number, default: 0 },
+    images: [{ type: String }],
     createdBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
 });
 const ProductModel = mongoose_1.default.model('Product', ProductSchema);

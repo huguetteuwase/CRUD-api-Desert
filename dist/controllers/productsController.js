@@ -50,6 +50,14 @@ const createProduct = async (req, res) => {
         return res.status(400).json({ message: "Missing required product fields" });
     }
     try {
+        // Check if product with same name already exists
+        const existingProduct = await productModel_1.default.findOne({ name: name.trim() });
+        if (existingProduct) {
+            return res.status(409).json({
+                message: "Product with this name already exists",
+                existingProduct: mapProduct(existingProduct)
+            });
+        }
         // Resolve category: prefer Mongo _id when valid, else fallback to legacyId
         let cat = null;
         if (mongoose_1.default.isValidObjectId(categoryId)) {
@@ -61,7 +69,7 @@ const createProduct = async (req, res) => {
         if (!cat)
             return res.status(400).json({ message: "categoryId does not exist" });
         const created = await productModel_1.default.create({
-            name,
+            name: name.trim(),
             price,
             description,
             categoryId: cat._id,

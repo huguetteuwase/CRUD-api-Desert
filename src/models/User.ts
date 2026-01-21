@@ -9,6 +9,7 @@ export interface IUser extends Document {
   password: string;
   role: "customer" | "admin" | "vendor";
   isActive: boolean;
+  profilePicture?: string;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -34,7 +35,7 @@ const UserSchema = new Schema<IUser>(
       unique: true,
       lowercase: true,
       match: [
-        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         "Please enter a valid email",
       ],
     },
@@ -52,6 +53,9 @@ const UserSchema = new Schema<IUser>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    profilePicture: {
+      type: String,
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,

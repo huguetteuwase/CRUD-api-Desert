@@ -59,7 +59,7 @@ const UserSchema = new mongoose_1.Schema({
         unique: true,
         lowercase: true,
         match: [
-            /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
             "Please enter a valid email",
         ],
     },
@@ -77,6 +77,9 @@ const UserSchema = new mongoose_1.Schema({
     isActive: {
         type: Boolean,
         default: true,
+    },
+    profilePicture: {
+        type: String,
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,

@@ -7,6 +7,8 @@ exports.updateOrderStatus = exports.getAllOrders = exports.cancelOrder = exports
 const Order_1 = require("../models/Order");
 const cartModel_1 = __importDefault(require("../models/cartModel"));
 const productModel_1 = __importDefault(require("../models/productModel"));
+const User_1 = require("../models/User");
+const emailService_1 = require("../services/emailService");
 // POST /api/orders - Create order from cart
 const createOrder = async (req, res) => {
     try {
@@ -53,6 +55,11 @@ const createOrder = async (req, res) => {
         // Clear cart
         cart.items.splice(0, cart.items.length);
         await cart.save();
+        // Send order confirmation email
+        const user = await User_1.User.findById(userId);
+        if (user) {
+            emailService_1.emailService.sendOrderPlacedEmail(user.email, user.firstName, order._id.toString(), totalAmount);
+        }
         res.status(201).json({
             success: true,
             message: "Order placed successfully",
@@ -175,6 +182,11 @@ const updateOrderStatus = async (req, res) => {
         }
         order.status = status;
         await order.save();
+        // Send order status update email
+        const user = await User_1.User.findById(order.userId);
+        if (user) {
+            emailService_1.emailService.sendOrderStatusEmail(user.email, user.firstName, order._id.toString(), status);
+        }
         res.status(200).json({
             success: true,
             message: "Order status updated successfully",

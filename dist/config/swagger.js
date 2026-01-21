@@ -124,6 +124,7 @@ const options = {
             { name: "Admin Orders", description: "Order management for admins" },
             { name: "Users CRUD", description: "Simple users CRUD operations" },
             { name: "Orders CRUD", description: "Simple orders CRUD operations" },
+            { name: "File Upload", description: "File upload and management" },
         ],
     },
     apis: ["./src/routes/*.ts"], // Path to API routes
